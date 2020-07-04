@@ -1,0 +1,25 @@
+version: 2
+jobs:
+  build:
+    docker:
+    - image: ghost6482/kernel_arm64-docker
+    steps:
+    - run:
+        name: Checkout
+        command: |
+          git clone https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git . --depth=1 --branch=$CIRCLE_BRANCH --recurse-submodules -j$(nproc --all)
+    - run:
+        name: Here we go!
+        command: |
+          export KBUILD_BUILD_USER=uixdess
+          make sirius_defconfig O=out
+          make -j$(nproc --all) O=out CC=clang
+    - run:
+        name: Upload
+        command: |
+          curl -F chat_id=$CHAT_ID -F document=@out/arch/arm64/boot/Image.gz-dtb -F parse_mode=markdown https://api.telegram.org/bot"$BOT_API_TOKEN"/sendDocument
+workflows:
+  version: 2
+  workflow:
+    jobs:
+    - build
