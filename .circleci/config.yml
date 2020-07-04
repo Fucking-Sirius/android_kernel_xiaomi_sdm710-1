@@ -2,18 +2,18 @@ version: 2
 jobs:
   build:
     docker:
-    - image: ghost6482/kernel_arm64-docker
+    - image: ghost6482/kernel_arm64:clang
     steps:
     - run:
         name: Checkout
         command: |
-          git clone https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git . --depth=1 --branch=$CIRCLE_BRANCH --recurse-submodules -j$(nproc --all)
+          git clone https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git . --branch=$CIRCLE_BRANCH --recurse-submodules -j$(nproc --all)
     - run:
         name: Here we go!
         command: |
           export KBUILD_BUILD_USER=uixdess
           make sirius_defconfig O=out
-          make -j$(nproc --all) O=out CC=clang
+          make -j$(nproc --all) O=out CC=clang AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump STRIP=llvm-strip
     - run:
         name: Upload
         command: |
